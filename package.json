@@ -6,9 +6,16 @@
     "dev": "bun run --watch src/index.ts"
   },
   "dependencies": {
-    "elysia": "latest"
+    "@elysiajs/static": "^1.4.7",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "elysia": "latest",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "tailwindcss": "4"
   },
   "devDependencies": {
+    "bun-plugin-tailwind": "^0.1.2",
     "bun-types": "latest"
   },
   "module": "src/index.js"
