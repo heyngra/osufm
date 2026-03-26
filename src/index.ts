@@ -128,7 +128,12 @@ const app = new Elysia()
     const user = await apiGetRequest("/api/v2/me", access_token);
     if (user) {
       const id: number = user.id;
-      sqlite.run("INSERT OR REPLACE INTO osuAPI(ID, TOKEN, EXPIRES_IN, REFRESH_TOKEN) VALUES(?, ?, ?, ?)", [id, access_token, (Date.now()/1000)+expires_in, refresh_token])
+      const existing = sqlite.query("SELECT ID FROM osuAPI WHERE ID = ?").get(id);
+      if (existing) {
+        sqlite.run("UPDATE osuAPI SET TOKEN = ?, EXPIRES_IN = ?, REFRESH_TOKEN = ? WHERE ID = ?", [access_token, (Date.now()/1000)+expires_in, refresh_token, id]);
+      } else {
+        sqlite.run("INSERT INTO osuAPI(ID, TOKEN, EXPIRES_IN, REFRESH_TOKEN) VALUES(?, ?, ?, ?)", [id, access_token, (Date.now()/1000)+expires_in, refresh_token]);
+      }
       context.cookie.osuToken.value = access_token;
       return context.redirect("/")
     }
@@ -148,8 +153,12 @@ const app = new Elysia()
     json = json["session"];
     const { name, key } = json;
     if (json && json.subscriber == 0) {
-      sqlite.run("INSERT OR IGNORE INTO lastFMAPI(NAME, TOKEN) VALUES (?, ?)", [name, key]);
-      sqlite.run("UPDATE lastFMAPI SET TOKEN = ? where NAME = ?", [key, name]);
+      const existing = sqlite.query("SELECT NAME FROM lastFMAPI WHERE NAME = ?").get(name);
+      if (existing) {
+        sqlite.run("UPDATE lastFMAPI SET TOKEN = ? WHERE NAME = ?", [key, name]);
+      } else {
+        sqlite.run("INSERT INTO lastFMAPI(NAME, TOKEN) VALUES (?, ?)", [name, key]);
+      }
       context.cookie.lastFMToken.value = key;
       return context.redirect("/");
     }
@@ -173,8 +182,8 @@ const app = new Elysia()
       }
 
       sqlite.run(
-        "INSERT OR REPLACE INTO mergedAccounts (ID, osuAPI_ID, lastFMAPI_NAME) VALUES (?, ?, ?)",
-        [osuUser.ID, osuUser.ID, fmUser.NAME]
+        "INSERT OR REPLACE INTO mergedAccounts (osuAPI_ID, lastFMAPI_NAME) VALUES (?, ?)",
+        [osuUser.ID, fmUser.NAME]
       );
 
       return { success: true };
@@ -195,6 +204,64 @@ const app = new Elysia()
       return context.status(200);
     }
     return context.status(401);
+  })
+  .get("/api/checkLinkStatus", async (context) => {
+    const osuToken = context.cookie.osuToken.value as string | undefined;
+    const lastFMToken = context.cookie.lastFMToken.value as string | undefined;
+
+    if (!osuToken || !lastFMToken) {
+      return { linked: false, reason: "missing_tokens" };
+    }
+
+    const osuUser = sqlite.query("SELECT ID FROM osuAPI WHERE TOKEN = ?").get(osuToken) as { ID: number } | null;
+    const fmUser = sqlite.query("SELECT NAME FROM lastFMAPI WHERE TOKEN = ?").get(lastFMToken) as { NAME: string } | null;
+
+    if (!osuUser) {
+      return { linked: false, reason: "osu_account_not_found" };
+    }
+    if (!fmUser) {
+      return { linked: false, reason: "lastfm_account_not_found" };
+    }
+
+    const existingLink = sqlite.query(
+      "SELECT ID FROM mergedAccounts WHERE osuAPI_ID = ? AND lastFMAPI_NAME = ?"
+    ).get(osuUser.ID, fmUser.NAME);
+
+    return { linked: !!existingLink };
+  })
+  .get("/api/deleteOsuAccount", async (context) => {
+    const osuToken = context.cookie.osuToken.value as string | undefined;
+
+    if (!osuToken) {
+      return context.status(401);
+    }
+
+    const osuUser = sqlite.query("SELECT ID FROM osuAPI WHERE TOKEN = ?").get(osuToken) as { ID: number } | null;
+
+    if (osuUser) {
+      sqlite.run("DELETE FROM mergedAccounts WHERE osuAPI_ID = ?", [osuUser.ID]);
+      sqlite.run("DELETE FROM osuAPI WHERE TOKEN = ?", [osuToken]);
+    }
+
+    context.cookie.osuToken.remove()
+    return { success: true };
+  })
+  .get("/api/deleteLastFMAccount", async (context) => {
+    const lastFMToken = context.cookie.lastFMToken.value as string | undefined;
+
+    if (!lastFMToken) {
+      return context.status(401);
+    }
+
+    const fmUser = sqlite.query("SELECT NAME FROM lastFMAPI WHERE TOKEN = ?").get(lastFMToken) as { NAME: string } | null;
+
+    if (fmUser) {
+      sqlite.run("DELETE FROM mergedAccounts WHERE lastFMAPI_NAME = ?", [fmUser.NAME]);
+      sqlite.run("DELETE FROM lastFMAPI WHERE TOKEN = ?", [lastFMToken]);
+    }
+
+    context.cookie.lastFMToken.remove()
+    return { success: true };
   })
   .use(await staticPlugin({
     prefix:'/'
