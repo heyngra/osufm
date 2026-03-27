@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { createRoot } from 'react-dom/client'
+import { Helmet } from 'react-helmet'
 
 interface PublicAPI {
   osuClientID: string
@@ -81,13 +82,24 @@ function App() {
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-pink-50 to-white flex flex-col items-center py-12 px-4">
+      <Helmet>
+        <title>osu!fm</title>
+        <meta name="title" content="osu!fm - Your osu! scrobbler" />
+        <meta name="description" content="Scrobble your osu! plays directly to last.fm!"></meta>
+        <meta property="og:locale" content="en_US" />
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="osu!fm - Your osu! scrobbler" />
+        <meta property="og:description" content="Scrobble your osu! plays directly to last.fm!" />
+        <meta property="og:url" content="https://fm.heyn.live" />
+        <meta property="og:site_name" content="osu!fm" />
+      </Helmet>
       <div className="max-w-xl w-full">
         <h1 className="text-4xl font-bold text-pink-600 text-center mb-2 animate-[slideUp_0.5s_ease-out]">
           osu!fm
         </h1>
-        <p className="text-pink-400 text-center mb-8 animate-[slideUp_0.5s_ease-out_0.1s_both]">
+        <div className="text-pink-400 text-center mb-8 animate-[slideUp_0.5s_ease-out_0.1s_both]">
           Scrobble your osu! plays live to Last.fm
-        </p>
+        </div>
 
         <div className="bg-white rounded-2xl shadow-lg border border-pink-100 p-6 mb-6 hover:shadow-xl transition-shadow duration-300 animate-[slideUp_0.5s_ease-out_0.2s_both]">
           <div className="flex items-center justify-between mb-4">
@@ -189,24 +201,24 @@ function App() {
           <h2 className="text-3xl font-semibold text-pink-700 mb-3 border-l-6 border-pink-400 pl-3 mt-6">
             About
           </h2>
-          <p className="text-pink-600 text-md leading-relaxed">
+          <div className="text-pink-600 text-md leading-relaxed">
             <a href="https://last.fm" target="_blank" className="text-purple-600 font-bold hover:underline decoration-purple-400 underline-offset-2 transition-all">Last.fm</a> is a website that allows everyone with an account to save each song they have listened to, and track all data related to music usage. What if you scrobble it from <b>osu!</b>?
-          </p>
-          <p className="text-pink-600 text-md leading-relaxed">
+          </div>
+          <div className="text-pink-600 text-md leading-relaxed">
             That's where <b>osu!fm</b> comes, a site which allows you to scrobble played songs from <b>osu!</b> with no hassle. Linking your osu! and last.fm account is enough to enjoy your osu! scrobbles.
-          </p>
+          </div>
           <h2 className="text-2xl font-semibold text-pink-700 mb-3 border-l-4 border-pink-400 pl-3 mt-6">
             How does it work?
           </h2>
-          <p className="text-pink-600 text-md leading-relaxed">
+          <div className="text-pink-600 text-md leading-relaxed">
             This site does not do any black magic, and <span title="hi, it's me, heyn!">I</span> would be ashamed if something like that took place, really. This app uses <a className="text-purple-600 font-bold hover:underline decoration-purple-400 underline-offset-2 transition-all" href="https://osu.ppy.sh/docs/index.html#get-scores102" target="_blank">"Get Scores"</a> API endpoint to gather your scores, and last.fm's scrobble API to upload them to your account.
-          </p>
+          </div>
           <h2 className="text-2xl font-semibold text-pink-700 mb-3 border-l-4 border-pink-400 pl-3 mt-6">
             Security, privacy policy, etc.
           </h2>
-          <p className="text-pink-600 text-md leading-relaxed">
+          <div className="text-pink-600 text-md leading-relaxed">
             Don't be afraid, I'm not storing any vulnerable data on my site. Data stored here:
-          </p>
+          </div>
           <ul className="list-disc list-inside space-y-2 text-pink-600 text-md mt-2 ml-2">
             <li>
               osu! API token obtained from logging in
@@ -216,14 +228,20 @@ function App() {
               last.fm API token obtained from logging in
               <span className="text-gray-500 text-xs block ml-4">(Same case as above, however this can token can obviously be used to write new scrobbles to your account. It will ONLY be used when you submit a new score, but if you are uncertain, then you can revoke it in your last.fm account settings.)</span>
             </li>
+            <li title="My ID is 10494504">
+              Your osu! ID
+            </li>
+            <li>
+              Your last.fm username (it serves as an ID)
+            </li>
           </ul>
-          <p className="text-pink-600 text-md leading-relaxed">
+          <div className="text-pink-600 text-md leading-relaxed">
             Still unsure? You can always check the source code down below! &lt;3
-          </p>
+          </div>
           <h2 className="text-2xl font-semibold text-pink-700 mb-3 border-l-4 border-pink-400 pl-3 mt-6">
             Issues?
           </h2>
-          <p className="text-pink-600 text-md leading-relaxed">
+          <div className="text-pink-600 text-md leading-relaxed">
             If there are any issues or questions related to this website, you can send them to me:
             <ul className="list-disc list-inside space-y-2 text-pink-600 text-md mt-2 ml-2">
               <li>
@@ -240,7 +258,8 @@ function App() {
                 Or alternatively, you can PM me on osu!, but I can't guarantee a quick response.
               </li>
             </ul>
-          </p>
+            <span className="text-xs">I cannot guarantee any SLA as this app is hosted on my small personal server. Small outages or blackouts might happen. If in need, contact me using methods written above.</span>
+          </div>
         </div>
 
         <footer className="mt-8 text-center animate-[slideUp_0.5s_ease-out_0.4s_both]">
@@ -257,9 +276,12 @@ function App() {
               </svg>
             </a>
           </div>
-          <p className="text-pink-400 text-sm">
+          <div className="text-pink-400 text-sm">
             Made with ♡ by <a href="https://osu.ppy.sh/u/heyn" target="_blank"> heyn</a>
-          </p>
+          </div>
+          <div className="text-pink-400 text-sm">
+            Not affiliated with osu! or ppy Pty Ltd.
+          </div>
         </footer>
       </div>
     </main>
