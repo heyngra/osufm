@@ -1,6 +1,7 @@
 <div align="center">
   <h1><a href="https://fm.heyn.live">osu!fm</a></h1>
   Scrobble your osu! scores live to last.fm!
+  <video src="https://github.com/user-attachments/assets/a28b51a1-7025-48cd-866f-6e51efd3a84f"></video>
 </div>
 <h2>About</h2>
 Have you ever used last.fm? Usually, you can use it to save your listening history from f.e. Spotify or YouTube. But what if you wanted to store your awesome osu! pp grind or some classics? osu!fm has got you covered.
